@@ -7,7 +7,9 @@ import hudson.plugins.analysis.core.BuildHistory;
 import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.analysis.core.ParserResult;
 import hudson.plugins.analysis.core.ResultAction;
+import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.checkstyle.parser.Warning;
+
 
 /**
  * Represents the results of the Checkstyle analysis. One instance of this class
