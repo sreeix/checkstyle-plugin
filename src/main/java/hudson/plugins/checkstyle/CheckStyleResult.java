@@ -64,9 +64,13 @@ public class CheckStyleResult extends BuildResult {
         if (canSerialize) {
             serializeAnnotations(result.getAnnotations());
         }
-        if(shouldRatchet && this.getNewWarnings().size() > 0) {
+        if(shouldRatchet && this.isSuccessful() && hasPreviousWarningHistory() && this.getNumberOfNewWarnings() > 0) {
             this.setResult(Result.FAILURE);
         }
+    }
+
+    private boolean hasPreviousWarningHistory() {
+        return this.getHistory().hasReferenceBuild() && this.getHistory().getPreviousResult().getNumberOfWarnings() > 0;
     }
 
     @Override
