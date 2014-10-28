@@ -5,7 +5,13 @@
            description="${%description.pattern('http://ant.apache.org/manual/Types/fileset.html')}">
     <f:textbox/>
   </f:entry>
+  <f:entry title="Ratchet"
+           description="Ratchet to the last warning count">
+      <f:checkbox field='shouldRatchet' title='Ratchet' description="If we turn ratcheting on, new checkstyle warnings will cause build failures"></f:checkbox>
+  </f:entry>
+
   <f:advanced>
     <u:advanced id="checkstyle"/>
+
   </f:advanced>
 </j:jelly>

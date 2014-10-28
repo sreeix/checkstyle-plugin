@@ -3,21 +3,20 @@ package hudson.plugins.checkstyle;
 import hudson.Launcher;
 import hudson.matrix.MatrixAggregator;
 import hudson.matrix.MatrixBuild;
-import hudson.model.Action;
-import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.analysis.core.FilesParser;
 import hudson.plugins.analysis.core.HealthAwarePublisher;
 import hudson.plugins.analysis.core.ParserResult;
-import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.analysis.util.PluginLogger;
 import hudson.plugins.checkstyle.parser.CheckStyleParser;
-
-import java.io.IOException;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Publishes the results of the Checkstyle analysis  (freestyle project type).
@@ -34,7 +33,7 @@ public class CheckStylePublisher extends HealthAwarePublisher {
     private static final String DEFAULT_PATTERN = "**/checkstyle-result.xml";
     /** Ant file-set pattern of files to work with. */
     private final String pattern;
-
+    private boolean shouldRatchet;
     /**
      * Creates a new instance of <code>CheckstylePublisher</code>.
      *
@@ -96,7 +95,11 @@ public class CheckStylePublisher extends HealthAwarePublisher {
      *            respect to baseline)
      * @param pattern
      *            Ant file-set pattern to scan for Checkstyle files
-     */
+     * @param shouldRatchet
+     *            A simple boolean to set ratcheting on. Ratcheting implies that the new warnings will trigger an error,
+     *            reducing the warnings are ok.
+
+    */
     // CHECKSTYLE:OFF
     @SuppressWarnings("PMD.ExcessiveParameterList")
     @DataBoundConstructor
@@ -107,7 +110,7 @@ public class CheckStylePublisher extends HealthAwarePublisher {
             final String failedTotalAll, final String failedTotalHigh, final String failedTotalNormal, final String failedTotalLow,
             final String failedNewAll, final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
             final boolean canRunOnFailed, final boolean useStableBuildAsReference, final boolean shouldDetectModules,
-            final boolean canComputeNew, final String pattern) {
+            final boolean canComputeNew, final String pattern, final boolean shouldRatchet) {
         super(healthy, unHealthy, thresholdLimit, defaultEncoding, useDeltaValues,
                 unstableTotalAll, unstableTotalHigh, unstableTotalNormal, unstableTotalLow,
                 unstableNewAll, unstableNewHigh, unstableNewNormal, unstableNewLow,
@@ -116,9 +119,13 @@ public class CheckStylePublisher extends HealthAwarePublisher {
                 canRunOnFailed, useStableBuildAsReference, shouldDetectModules, canComputeNew,
                 true, PLUGIN_NAME);
         this.pattern = pattern;
+        this.shouldRatchet = shouldRatchet;
     }
     // CHECKSTYLE:ON
 
+    public boolean getShouldRatchet(){
+        return this.shouldRatchet;
+    }
     /**
      * Returns the Ant file-set pattern of files to work with.
      *
@@ -143,7 +150,7 @@ public class CheckStylePublisher extends HealthAwarePublisher {
         ParserResult project = build.getWorkspace().act(parser);
         logger.logLines(project.getLogMessages());
 
-        CheckStyleResult result = new CheckStyleResult(build, getDefaultEncoding(), project, getUseStableBuildAsReference());
+        CheckStyleResult result = new CheckStyleResult(build, getDefaultEncoding(), project, getUseStableBuildAsReference(), this.shouldRatchet);
         build.getActions().add(new CheckStyleResultAction(build, this, result));
 
         return result;

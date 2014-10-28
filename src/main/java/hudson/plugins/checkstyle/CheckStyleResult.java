@@ -8,6 +8,7 @@ import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.checkstyle.parser.Warning;
 
 import com.thoughtworks.xstream.XStream;
+import hudson.model.Result;
 
 /**
  * Represents the results of the Checkstyle analysis. One instance of this class
@@ -32,7 +33,7 @@ public class CheckStyleResult extends BuildResult {
      *            reference builds or not
      */
     public CheckStyleResult(final AbstractBuild<?, ?> build, final String defaultEncoding, final ParserResult result,
-            final boolean useStableBuildAsReference) {
+            final boolean useStableBuildAsReference, final boolean shouldRatchet) {
         this(build, defaultEncoding, result, useStableBuildAsReference, CheckStyleResultAction.class);
     }
 
@@ -53,15 +54,18 @@ public class CheckStyleResult extends BuildResult {
      */
     protected CheckStyleResult(final AbstractBuild<?, ?> build, final String defaultEncoding, final ParserResult result,
             final boolean useStableBuildAsReference, final Class<? extends ResultAction<CheckStyleResult>> actionType) {
-        this(build, new BuildHistory(build, actionType, useStableBuildAsReference), result, defaultEncoding, true);
+        this(build, new BuildHistory(build, actionType, useStableBuildAsReference), result, defaultEncoding, true, true);
     }
 
     CheckStyleResult(final AbstractBuild<?, ?> build, final BuildHistory history,
-            final ParserResult result, final String defaultEncoding, final boolean canSerialize) {
+            final ParserResult result, final String defaultEncoding, final boolean canSerialize, final boolean shouldRatchet) {
         super(build, history, result, defaultEncoding);
 
         if (canSerialize) {
             serializeAnnotations(result.getAnnotations());
+        }
+        if(shouldRatchet && this.getNewWarnings().size() > 0) {
+            this.setResult(Result.FAILURE);
         }
     }
 
