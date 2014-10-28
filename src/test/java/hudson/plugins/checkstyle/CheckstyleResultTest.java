@@ -11,7 +11,7 @@ import hudson.plugins.analysis.test.BuildResultTest;
 public class CheckstyleResultTest extends BuildResultTest<CheckStyleResult> {
     @Override
     protected CheckStyleResult createBuildResult(final AbstractBuild<?, ?> build, final ParserResult project, final BuildHistory history) {
-        return new CheckStyleResult(build, history, project, "UTF8", false);
+        return new CheckStyleResult(build, history, project, "UTF8", false, false);
     }
 }
 

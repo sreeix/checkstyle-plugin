@@ -39,7 +39,7 @@ public class MavenCheckStyleResultAction extends CheckStyleResultAction implemen
      */
     public MavenCheckStyleResultAction(final AbstractBuild<?, ?> owner, final HealthDescriptor healthDescriptor,
             final String defaultEncoding) {
-        super(owner, healthDescriptor, new CheckStyleResult(owner, defaultEncoding, new ParserResult(), false));
+        super(owner, healthDescriptor, new CheckStyleResult(owner, defaultEncoding, new ParserResult(), false, false));
         this.defaultEncoding = defaultEncoding;
     }
 
