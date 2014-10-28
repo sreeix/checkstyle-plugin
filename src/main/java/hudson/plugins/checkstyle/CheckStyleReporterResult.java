@@ -28,7 +28,7 @@ public class CheckStyleReporterResult extends CheckStyleResult {
      */
     public CheckStyleReporterResult(final AbstractBuild<?, ?> build, final String defaultEncoding, final ParserResult result,
             final boolean useStableBuildAsReference) {
-        super(build, defaultEncoding, result, useStableBuildAsReference, CheckStyleMavenResultAction.class);
+        super(build, defaultEncoding, result, useStableBuildAsReference, CheckStyleMavenResultAction.class, true);
     }
 
     @Override

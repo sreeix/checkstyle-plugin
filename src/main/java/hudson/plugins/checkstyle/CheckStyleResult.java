@@ -1,14 +1,13 @@
 package hudson.plugins.checkstyle;
 
+import com.thoughtworks.xstream.XStream;
 import hudson.model.AbstractBuild;
+import hudson.model.Result;
 import hudson.plugins.analysis.core.BuildHistory;
+import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.analysis.core.ParserResult;
 import hudson.plugins.analysis.core.ResultAction;
-import hudson.plugins.analysis.core.BuildResult;
 import hudson.plugins.checkstyle.parser.Warning;
-
-import com.thoughtworks.xstream.XStream;
-import hudson.model.Result;
 
 /**
  * Represents the results of the Checkstyle analysis. One instance of this class
@@ -18,6 +17,7 @@ import hudson.model.Result;
  */
 public class CheckStyleResult extends BuildResult {
     private static final long serialVersionUID = 2768250056765266658L;
+    private boolean failedBecauseOfRatchet = false;
 
     /**
      * Creates a new instance of {@link CheckStyleResult}.
@@ -34,7 +34,7 @@ public class CheckStyleResult extends BuildResult {
      */
     public CheckStyleResult(final AbstractBuild<?, ?> build, final String defaultEncoding, final ParserResult result,
             final boolean useStableBuildAsReference, final boolean shouldRatchet) {
-        this(build, defaultEncoding, result, useStableBuildAsReference, CheckStyleResultAction.class);
+        this(build, defaultEncoding, result, useStableBuildAsReference, CheckStyleResultAction.class, shouldRatchet);
     }
 
     /**
@@ -53,8 +53,8 @@ public class CheckStyleResult extends BuildResult {
      *            the type of the result action
      */
     protected CheckStyleResult(final AbstractBuild<?, ?> build, final String defaultEncoding, final ParserResult result,
-            final boolean useStableBuildAsReference, final Class<? extends ResultAction<CheckStyleResult>> actionType) {
-        this(build, new BuildHistory(build, actionType, useStableBuildAsReference), result, defaultEncoding, true, true);
+            final boolean useStableBuildAsReference, final Class<? extends ResultAction<CheckStyleResult>> actionType, final boolean shouldRatchet) {
+        this(build, new BuildHistory(build, actionType, useStableBuildAsReference), result, defaultEncoding, true, shouldRatchet);
     }
 
     CheckStyleResult(final AbstractBuild<?, ?> build, final BuildHistory history,
@@ -64,9 +64,18 @@ public class CheckStyleResult extends BuildResult {
         if (canSerialize) {
             serializeAnnotations(result.getAnnotations());
         }
-        if(shouldRatchet && this.getNewWarnings().size() > 0) {
+        if(shouldRatchet && this.isSuccessful() && hasPreviousWarningHistory() && this.getNumberOfNewWarnings() > 0) {
+            this.failedBecauseOfRatchet = true;
             this.setResult(Result.FAILURE);
         }
+    }
+
+    public boolean hasRatchetFailed() {
+        return this.failedBecauseOfRatchet;
+    }
+
+    private boolean hasPreviousWarningHistory() {
+        return this.getHistory().hasReferenceBuild() && this.getHistory().getPreviousResult().getNumberOfWarnings() > 0;
     }
 
     @Override

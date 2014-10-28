@@ -24,93 +24,72 @@ import java.io.IOException;
  * @author Ulli Hafner
  */
 public class CheckStylePublisher extends HealthAwarePublisher {
-    /** Unique ID of this class. */
+    /**
+     * Unique ID of this class.
+     */
     private static final long serialVersionUID = 6369581633551160418L;
 
     private static final String PLUGIN_NAME = "CHECKSTYLE";
 
-    /** Default Checkstyle pattern. */
+    /**
+     * Default Checkstyle pattern.
+     */
     private static final String DEFAULT_PATTERN = "**/checkstyle-result.xml";
-    /** Ant file-set pattern of files to work with. */
+    /**
+     * Ant file-set pattern of files to work with.
+     */
     private final String pattern;
     private boolean shouldRatchet;
+
     /**
      * Creates a new instance of <code>CheckstylePublisher</code>.
      *
-     * @param healthy
-     *            Report health as 100% when the number of warnings is less than
-     *            this value
-     * @param unHealthy
-     *            Report health as 0% when the number of warnings is greater
-     *            than this value
-     * @param thresholdLimit
-     *            determines which warning priorities should be considered when
-     *            evaluating the build stability and health
-     * @param defaultEncoding
-     *            the default encoding to be used when reading and parsing files
-     * @param useDeltaValues
-     *            determines whether the absolute annotations delta or the
-     *            actual annotations set difference should be used to evaluate
-     *            the build stability
-     * @param unstableTotalAll
-     *            annotation threshold
-     * @param unstableTotalHigh
-     *            annotation threshold
-     * @param unstableTotalNormal
-     *            annotation threshold
-     * @param unstableTotalLow
-     *            annotation threshold
-     * @param unstableNewAll
-     *            annotation threshold
-     * @param unstableNewHigh
-     *            annotation threshold
-     * @param unstableNewNormal
-     *            annotation threshold
-     * @param unstableNewLow
-     *            annotation threshold
-     * @param failedTotalAll
-     *            annotation threshold
-     * @param failedTotalHigh
-     *            annotation threshold
-     * @param failedTotalNormal
-     *            annotation threshold
-     * @param failedTotalLow
-     *            annotation threshold
-     * @param failedNewAll
-     *            annotation threshold
-     * @param failedNewHigh
-     *            annotation threshold
-     * @param failedNewNormal
-     *            annotation threshold
-     * @param failedNewLow
-     *            annotation threshold
-     * @param canRunOnFailed
-     *            determines whether the plug-in can run for failed builds, too
-     * @param useStableBuildAsReference
-     *            determines whether only stable builds should be used as reference builds or not
-     * @param shouldDetectModules
-     *            determines whether module names should be derived from Maven POM or Ant build files
-     * @param canComputeNew
-     *            determines whether new warnings should be computed (with
-     *            respect to baseline)
-     * @param pattern
-     *            Ant file-set pattern to scan for Checkstyle files
-     * @param shouldRatchet
-     *            A simple boolean to set ratcheting on. Ratcheting implies that the new warnings will trigger an error,
-     *            reducing the warnings are ok.
-
-    */
+     * @param healthy                   Report health as 100% when the number of warnings is less than
+     *                                  this value
+     * @param unHealthy                 Report health as 0% when the number of warnings is greater
+     *                                  than this value
+     * @param thresholdLimit            determines which warning priorities should be considered when
+     *                                  evaluating the build stability and health
+     * @param defaultEncoding           the default encoding to be used when reading and parsing files
+     * @param useDeltaValues            determines whether the absolute annotations delta or the
+     *                                  actual annotations set difference should be used to evaluate
+     *                                  the build stability
+     * @param unstableTotalAll          annotation threshold
+     * @param unstableTotalHigh         annotation threshold
+     * @param unstableTotalNormal       annotation threshold
+     * @param unstableTotalLow          annotation threshold
+     * @param unstableNewAll            annotation threshold
+     * @param unstableNewHigh           annotation threshold
+     * @param unstableNewNormal         annotation threshold
+     * @param unstableNewLow            annotation threshold
+     * @param failedTotalAll            annotation threshold
+     * @param failedTotalHigh           annotation threshold
+     * @param failedTotalNormal         annotation threshold
+     * @param failedTotalLow            annotation threshold
+     * @param failedNewAll              annotation threshold
+     * @param failedNewHigh             annotation threshold
+     * @param failedNewNormal           annotation threshold
+     * @param failedNewLow              annotation threshold
+     * @param canRunOnFailed            determines whether the plug-in can run for failed builds, too
+     * @param useStableBuildAsReference determines whether only stable builds should be used as reference builds or not
+     * @param shouldDetectModules       determines whether module names should be derived from Maven POM or Ant build files
+     * @param canComputeNew             determines whether new warnings should be computed (with
+     *                                  respect to baseline)
+     * @param pattern                   Ant file-set pattern to scan for Checkstyle files
+     * @param shouldRatchet             A simple boolean to set ratcheting on. Ratcheting implies that the new warnings will trigger an error,
+     *                                  reducing the warnings are ok.
+     */
     // CHECKSTYLE:OFF
     @SuppressWarnings("PMD.ExcessiveParameterList")
     @DataBoundConstructor
     public CheckStylePublisher(final String healthy, final String unHealthy, final String thresholdLimit,
-            final String defaultEncoding, final boolean useDeltaValues,
-            final String unstableTotalAll, final String unstableTotalHigh, final String unstableTotalNormal, final String unstableTotalLow,
-            final String unstableNewAll, final String unstableNewHigh, final String unstableNewNormal, final String unstableNewLow,
-            final String failedTotalAll, final String failedTotalHigh, final String failedTotalNormal, final String failedTotalLow,
-            final String failedNewAll, final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
-            final boolean canRunOnFailed, final boolean useStableBuildAsReference, final boolean shouldDetectModules,
-            final boolean canComputeNew, final String pattern, final boolean shouldRatchet) {
+                               final String defaultEncoding, final boolean useDeltaValues,
+                               final String unstableTotalAll, final String unstableTotalHigh, final String unstableTotalNormal, final String unstableTotalLow,
+                               final String unstableNewAll, final String unstableNewHigh, final String unstableNewNormal, final String unstableNewLow,
+                               final String failedTotalAll, final String failedTotalHigh, final String failedTotalNormal, final String failedTotalLow,
+                               final String failedNewAll, final String failedNewHigh, final String failedNewNormal, final String failedNewLow,
+                               final boolean canRunOnFailed, final boolean useStableBuildAsReference, final boolean shouldDetectModules,
+                               final boolean canComputeNew, final String pattern, final boolean shouldRatchet) {
         super(healthy, unHealthy, thresholdLimit, defaultEncoding, useDeltaValues,
                 unstableTotalAll, unstableTotalHigh, unstableTotalNormal, unstableTotalLow,
                 unstableNewAll, unstableNewHigh, unstableNewNormal, unstableNewLow,
@@ -123,9 +102,6 @@ public class CheckStylePublisher extends HealthAwarePublisher {
     }
     // CHECKSTYLE:ON
 
-    public boolean getShouldRatchet(){
-        return this.shouldRatchet;
-    }
     /**
      * Returns the Ant file-set pattern of files to work with.
      *
@@ -152,18 +128,21 @@ public class CheckStylePublisher extends HealthAwarePublisher {
 
         CheckStyleResult result = new CheckStyleResult(build, getDefaultEncoding(), project, getUseStableBuildAsReference(), this.shouldRatchet);
         build.getActions().add(new CheckStyleResultAction(build, this, result));
+        if (result.hasRatchetFailed()) {
+            logger.log("Ratcheting on the Checkstyle warnings failed. The number of warnings exceed the previous good build.");
+        }
 
         return result;
     }
 
     @Override
     public CheckStyleDescriptor getDescriptor() {
-        return (CheckStyleDescriptor)super.getDescriptor();
+        return (CheckStyleDescriptor) super.getDescriptor();
     }
 
     @Override
     public MatrixAggregator createAggregator(final MatrixBuild build, final Launcher launcher,
-            final BuildListener listener) {
+                                             final BuildListener listener) {
         return new CheckStyleAnnotationsAggregator(build, launcher, listener, this, getDefaultEncoding(), useOnlyStableBuildsAsReference());
     }
 }
